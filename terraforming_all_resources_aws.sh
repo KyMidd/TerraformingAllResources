@@ -1,5 +1,5 @@
 # Generate .tf and .tfstate for existing AWS VPC resources
-#  Author: Kyler Middleton, 7.8.2019
+#  Author: Kyler Middleton, 7.9.2019
 
 # Limitations/bugs
 # SG rules are stripped of descriptions during import for some reason
@@ -42,7 +42,7 @@ EOL
 
 # Identify which resource .tf files aren’t empty (resources exist of that type) and generate tfstate for each existing resource
 echo "Identify resource types which exist, generate tfstate for them"
-find temp -type f -not -empty -name '*.tf' -exec basename {} \; | sed -e 's/.tf//' $1 | sed s:temp/:: | awk '{print "terraforming", $1, "--tfstate", "--merge=terraform.tfstate", "--overwrite";}' | bash
+find temp -type f -not -empty -name '*.tf' -exec basename {} \; | sed -e 's/.tf//' $1 | awk '{print "terraforming", $1, "--tfstate", "--merge=terraform.tfstate", "--overwrite";}' | bash
 
 # Delete previous terraform_config.tf if it exists
 echo "Removing terraform_config.tf old files"
@@ -50,7 +50,7 @@ rm -f terraform_config.tf
 
 # Build single file with all .tf configuration in it
 echo "Building a single terraform_config.tf file with configuration for all existing resources"
-find temp -type f -not -empty -name '*.tf' -exec basename {} \; | sed -e 's/.tf//' $1 | sed s:temp/:: | awk '{print "terraforming", $1, ">>", "terraform_config.tf";}' | bash
+find temp -type f -not -empty -name '*.tf' -exec basename {} \; | sed -e 's/.tf//' $1 | awk '{print "terraforming", $1, ">>", "terraform_config.tf";}' | bash
 
 # remove previous version.tf file if exists
 echo "Removing versions.tf file which block 0.12upgrade process"
@@ -59,6 +59,10 @@ rm -f versions.tf
 # Fixup file for terraform 0.12, will automatically response yes
 echo "Auto-upgrading config and tfstate to 0.12 terraform standard"
 echo "yes" | terraform 0.12upgrade
+
+# Format all local scripts
+echo "Formatting scripts via terraform fmt"
+terraform fmt
 
 # Remove temp directory, no longer needed
 echo "Deleting temp directory and all contents"
