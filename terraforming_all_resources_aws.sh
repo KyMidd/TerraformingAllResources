@@ -57,7 +57,8 @@ echo "Removing versions.tf file which block 0.12upgrade process"
 rm -f versions.tf
 
 # Fixup file for terraform 0.12, will automatically response yes
-echo "Auto-upgrading config and tfstate to 0.12 terraform standard"
+echo "Init terraform project and auto-upgrading config and tfstate to 0.12 terraform standard"
+terraform init
 echo "yes" | terraform 0.12upgrade
 
 # Format all local scripts
