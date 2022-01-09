@@ -1,5 +1,5 @@
 # Generate .tf and .tfstate for existing AWS VPC resources
-#  Author: Kyler Middleton, 7.9.2019
+#  Author: Kyler Middleton, 7.8.2019
 
 # Limitations/bugs
 # SG rules are stripped of descriptions during import for some reason
@@ -56,14 +56,17 @@ find temp -type f -not -empty -name '*.tf' -exec basename {} \; | sed -e 's/.tf/
 echo "Removing versions.tf file which block 0.12upgrade process"
 rm -f versions.tf
 
-# Fixup file for terraform 0.12, will automatically response yes
-echo "Init terraform project and auto-upgrading config and tfstate to 0.12 terraform standard"
-terraform init
-echo "yes" | terraform 0.12upgrade
-
-# Format all local scripts
-echo "Formatting scripts via terraform fmt"
-terraform fmt
+# Init terraform
+echo "init and format Terraform"
+if $(terraform init && terraform fmt); then
+    echo "Code is initialized"
+else
+    echo "*******************************"
+    echo "There were formatting issues with your code which isn't unusual"
+    echo "Review the issues and manually fix them in the config file"
+    echo "Test against with command \"terraform init && terraform fmt\""
+    echo "*******************************"
+fi
 
 # Remove temp directory, no longer needed
 echo "Deleting temp directory and all contents"
